@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}RootCare — Votre santé en données{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-container">
+    <div class="hero-content animate-fadein">
+      <div class="live-pill">
+        <span class="live-dot"></span>
+        Collecte active — Rejoignez l'étude !
+      </div>
+      <h1 class="hero-title">
+        Votre hygiène de vie,<br>
+        <span class="accent">révélée par les données.</span>
+      </h1>
+      <p class="hero-sub">
+        Répondez à notre questionnaire en 3 minutes, obtenez votre score de santé personnalisé
+        et découvrez les tendances de votre communauté en temps réel.
+      </p>
+      <div class="hero-btns">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('formulaire') }}" class="btn btn-primary btn-lg">Remplir le formulaire</a>
+          <a href="{{ url_for('espace_user') }}" class="btn btn-outline btn-lg">Mon espace</a>
+        {% else %}
+          <a href="{{ url_for('inscription') }}" class="btn btn-primary btn-lg">Je participe maintenant</a>
+          <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">Se connecter</a>
+        {% endif %}
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num counter" data-target="{{ total }}">0</span>
+          <span class="hero-stat-label">Participants</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num counter" data-target="{{ villes_count }}">0</span>
+          <span class="hero-stat-label">Villes</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">3 min</span>
+          <span class="hero-stat-label">Pour répondre</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num counter" data-target="{{ score_moyen|int }}" data-suffix="/80">0</span>
+          <span class="hero-stat-label">Score moyen</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview graphiques flous -->
+    <div class="hero-preview animate-fadein-delay">
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-title">Résultats de l'étude</span>
+          <span class="preview-lock">🔒 Après participation</span>
+        </div>
+        <div class="preview-charts">
+          <div class="preview-chart blurred">
+            <div class="chart-label">Activité physique</div>
+            <div class="chart-bars">
+              <div class="chart-bar-row"><span>Quotidien</span><div class="bar-track"><div class="bar-fill" style="width:35%"></div></div><span>35%</span></div>
+              <div class="chart-bar-row"><span>3-5x/sem</span><div class="bar-track"><div class="bar-fill" style="width:28%"></div></div><span>28%</span></div>
+              <div class="chart-bar-row"><span>1-2x/sem</span><div class="bar-track"><div class="bar-fill" style="width:22%"></div></div><span>22%</span></div>
+              <div class="chart-bar-row"><span>Jamais</span><div class="bar-track"><div class="bar-fill" style="width:15%"></div></div><span>15%</span></div>
+            </div>
+          </div>
+          <div class="preview-chart blurred">
+            <div class="chart-label">Niveaux de santé</div>
+            <div class="donut-placeholder">
+              <div class="donut-ring"></div>
+              <div class="donut-center">??%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POURQUOI PARTICIPER -->
+<section class="section-why">
+  <div class="container">
+    <div class="section-header animate-fadein-scroll">
+      <h2 class="section-title">Pourquoi participer ?</h2>
+      <p class="section-sub">RootCare transforme vos réponses en insights personnalisés et collectifs.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card animate-fadein-scroll">
+        <div class="why-icon why-icon-teal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h3 class="why-title">Score personnalisé</h3>
+        <p class="why-text">Recevez votre score de santé sur 80 points, calculé automatiquement selon vos habitudes de vie.</p>
+      </div>
+      <div class="why-card animate-fadein-scroll">
+        <div class="why-icon why-icon-blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+        <h3 class="why-title">Graphiques en temps réel</h3>
+        <p class="why-text">Visualisez les tendances de votre communauté — qui dort mieux, qui fait plus de sport, quelle ville est la plus saine.</p>
+      </div>
+      <div class="why-card animate-fadein-scroll">
+        <div class="why-icon why-icon-amber">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h3 class="why-title">Conseils ciblés</h3>
+        <p class="why-text">Des recommandations santé personnalisées basées sur vos réponses — alimentation, sommeil, stress et plus.</p>
+      </div>
+      <div class="why-card animate-fadein-scroll">
+        <div class="why-icon why-icon-purple">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <h3 class="why-title">Impact communautaire</h3>
+        <p class="why-text">Vos données contribuent à une meilleure compréhension des habitudes de santé dans votre région.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENT ÇA MARCHE -->
+<section class="section-steps">
+  <div class="container">
+    <div class="section-header animate-fadein-scroll">
+      <h2 class="section-title">Comment ça marche ?</h2>
+    </div>
+    <div class="steps-row">
+      <div class="step animate-fadein-scroll">
+        <div class="step-num">1</div>
+        <div class="step-icon">📝</div>
+        <h3 class="step-title">Inscrivez-vous</h3>
+        <p class="step-text">Créez votre compte en 30 secondes avec votre email et date de naissance.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step animate-fadein-scroll">
+        <div class="step-num">2</div>
+        <div class="step-icon">📋</div>
+        <h3 class="step-title">Remplissez le formulaire</h3>
+        <p class="step-text">12 questions sur votre alimentation, sommeil, activité et habitudes de vie.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step animate-fadein-scroll">
+        <div class="step-num">3</div>
+        <div class="step-icon">📊</div>
+        <h3 class="step-title">Découvrez vos résultats</h3>
+        <p class="step-text">Votre score, vos conseils personnalisés et les graphiques communautaires débloqués.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+{% if not current_user.is_authenticated %}
+<section class="section-cta animate-fadein-scroll">
+  <div class="container">
+    <div class="cta-box">
+      <h2 class="cta-title">Prêt à connaître votre score de santé ?</h2>
+      <p class="cta-sub">Rejoignez {{ total }} participants qui ont déjà contribué à l'étude.</p>
+      <a href="{{ url_for('inscription') }}" class="btn btn-primary btn-lg">Je commence maintenant →</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

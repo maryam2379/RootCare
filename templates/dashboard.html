@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Admin — RootCare{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+  <div class="container">
+
+    <div class="dashboard-header animate-fadein">
+      <div>
+        <h1 class="espace-title">Dashboard <span class="accent">Admin</span></h1>
+        <p class="espace-sub">Vue d'ensemble de toutes les données collectées</p>
+      </div>
+      <a href="/api/stats" class="btn btn-outline" target="_blank">Export JSON</a>
+    </div>
+
+    <!-- STATS CARDS -->
+    <div class="admin-stats animate-fadein">
+      <div class="admin-stat-card">
+        <span class="admin-stat-num counter" data-target="{{ total }}">0</span>
+        <span class="admin-stat-label">Réponses totales</span>
+      </div>
+      <div class="admin-stat-card">
+        <span class="admin-stat-num counter" data-target="{{ users | length }}">0</span>
+        <span class="admin-stat-label">Utilisateurs inscrits</span>
+      </div>
+      <div class="admin-stat-card">
+        <span class="admin-stat-num" id="adminScoreMoy">—</span>
+        <span class="admin-stat-label">Score moyen</span>
+      </div>
+      <div class="admin-stat-card">
+        <span class="admin-stat-num" id="adminVilles">—</span>
+        <span class="admin-stat-label">Villes représentées</span>
+      </div>
+    </div>
+
+    <!-- GRAPHIQUES -->
+    <div class="charts-grid animate-fadein-scroll" style="margin-bottom:2rem;">
+      <div class="chart-card">
+        <h3 class="chart-title">Niveaux de santé</h3>
+        <canvas id="adminNiveaux" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Activité physique</h3>
+        <canvas id="adminActivite" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Participants par ville</h3>
+        <canvas id="adminVillesChart" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Consommation de tabac</h3>
+        <canvas id="adminTabac" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- TABLEAU DES DONNÉES -->
+    <div class="table-section animate-fadein-scroll">
+      <div class="table-header">
+        <h2 class="section-title-sm">Données collectées</h2>
+        <input type="text" placeholder="Rechercher..." class="form-input table-search" id="tableSearch" style="max-width:240px;">
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th>Participant</th>
+              <th>Âge</th>
+              <th>Ville</th>
+              <th>Score</th>
+              <th>Niveau</th>
+              <th>Activité</th>
+              <th>Sommeil</th>
+              <th>Tabac</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in donnees %}
+            {% set u = d.auteur %}
+            <tr>
+              <td>{{ u.nom if u else '—' }}</td>
+              <td>{{ u.age if u else '—' }}</td>
+              <td>{{ u.ville if u else '—' }}</td>
+              <td>
+                <span class="score-pill score-pill-{{ d.niveau_sante | lower | replace('é','e') | replace('è','e') }}">
+                  {{ d.score }}/80
+                </span>
+              </td>
+              <td>{{ d.niveau_sante }}</td>
+              <td>{{ d.activite_physique }}</td>
+              <td>{{ d.heures_sommeil }}</td>
+              <td>{{ d.tabac }}</td>
+              <td>{{ d.date_soumission.strftime('%d/%m/%Y') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="statsData" style="display:none">{{ stats }}</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const stats = JSON.parse(document.getElementById('statsData').textContent || '{}');
+const teal = '#1D9E75', blue = '#185FA5', amber = '#BA7517', purple = '#7F77DD', coral = '#D85A30', red = '#E24B4A';
+const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+const textColor = isDark ? '#c2c0b6' : '#3d3d3a';
+const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+Chart.defaults.color = textColor;
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+if (stats.score_moyen) document.getElementById('adminScoreMoy').textContent = stats.score_moyen + '/80';
+if (stats.villes) document.getElementById('adminVilles').textContent = Object.keys(stats.villes).length;
+
+if (stats.niveaux) {
+  new Chart(document.getElementById('adminNiveaux'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(stats.niveaux), datasets: [{ data: Object.values(stats.niveaux), backgroundColor: [coral, amber, teal, blue], borderWidth: 0 }] },
+    options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+  });
+}
+if (stats.activites) {
+  const labels = {'jamais':'Jamais','1-2x':'1-2x','3-5x':'3-5x','quotidien':'Quotidien'};
+  new Chart(document.getElementById('adminActivite'), {
+    type: 'bar',
+    data: { labels: Object.keys(stats.activites).map(k => labels[k]||k), datasets: [{ data: Object.values(stats.activites), backgroundColor: teal, borderRadius: 6 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: gridColor }, beginAtZero: true }, x: { grid: { display: false } } } }
+  });
+}
+if (stats.villes) {
+  const top = Object.entries(stats.villes).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  new Chart(document.getElementById('adminVillesChart'), {
+    type: 'bar',
+    data: { labels: top.map(v=>v[0]), datasets: [{ data: top.map(v=>v[1]), backgroundColor: purple, borderRadius: 6 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor }, beginAtZero: true }, y: { grid: { display: false } } } }
+  });
+}
+// Tabac simulé (à remplacer par vraies données agrégées)
+new Chart(document.getElementById('adminTabac'), {
+  type: 'pie',
+  data: { labels: ['Jamais','Occasionnel','Régulier'], datasets: [{ data: [60, 25, 15], backgroundColor: [teal, amber, red], borderWidth: 0 }] },
+  options: { plugins: { legend: { position: 'bottom' } } }
+});
+
+// Recherche tableau
+document.getElementById('tableSearch').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('#dataTable tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}

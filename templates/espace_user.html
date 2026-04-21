@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block title %}Mon Espace — RootCare{% endblock %}
+
+{% block content %}
+<section class="espace-section">
+  <div class="container">
+
+    {% if not donnee %}
+    <div class="no-data-box animate-fadein">
+      <div class="no-data-icon">📋</div>
+      <h2>Vous n'avez pas encore soumis le formulaire</h2>
+      <p>Remplissez le questionnaire pour obtenir votre score de santé personnalisé.</p>
+      <a href="{{ url_for('formulaire') }}" class="btn btn-primary btn-lg">Remplir le formulaire →</a>
+    </div>
+    {% else %}
+
+    <!-- EN-TÊTE -->
+    <div class="espace-header animate-fadein">
+      <div>
+        <h1 class="espace-title">Bonjour <span class="accent">{{ current_user.nom.split()[0] }}</span> 👋</h1>
+        <p class="espace-sub">Voici votre bilan de santé — soumis le {{ donnee.date_soumission.strftime('%d/%m/%Y à %H:%M') }}</p>
+      </div>
+      <a href="{{ url_for('formulaire') }}" class="btn btn-outline">Mettre à jour mes réponses</a>
+    </div>
+
+    <!-- SCORE GLOBAL -->
+    <div class="score-section animate-fadein">
+      <div class="score-main-card">
+        <div class="score-circle-wrap">
+          <svg class="score-svg" viewBox="0 0 120 120" width="120" height="120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="8"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--teal)" stroke-width="8"
+              stroke-dasharray="314"
+              stroke-dashoffset="{{ 314 - (314 * donnee.score / 80) | int }}"
+              stroke-linecap="round"
+              transform="rotate(-90 60 60)"
+              class="score-arc" id="scoreArc"
+              data-score="{{ donnee.score }}"
+              data-max="80"/>
+          </svg>
+          <div class="score-inner">
+            <span class="score-number counter" data-target="{{ donnee.score }}">0</span>
+            <span class="score-denom">/80</span>
+          </div>
+        </div>
+        <div class="score-info">
+          <div class="niveau-badge niveau-{{ donnee.niveau_sante | lower | replace('é','e') | replace('è','e') }}">
+            {{ donnee.niveau_sante }}
+          </div>
+          <p class="score-description">
+            {% if donnee.niveau_sante == 'Champion' %}
+              Excellent ! Vous avez d'excellentes habitudes de vie. Continuez ainsi !
+            {% elif donnee.niveau_sante == 'Actif' %}
+              Très bien ! Vous êtes au-dessus de la moyenne. Quelques ajustements peuvent vous faire passer Champion.
+            {% elif donnee.niveau_sante == 'Intermédiaire' %}
+              Vous avez de bonnes bases. Consultez vos conseils pour progresser.
+            {% else %}
+              C'est un début ! Suivez vos conseils personnalisés pour améliorer vos habitudes.
+            {% endif %}
+          </p>
+          <div class="score-meta">
+            <span>Rang #<strong class="counter" data-target="{{ rang }}">0</strong> parmi {{ total }} participants</span>
+            <span>Moyenne communauté : <strong>{{ score_moyen }}/80</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCORES DÉTAILLÉS -->
+    <div class="detail-section animate-fadein-scroll">
+      <h2 class="section-title-sm">Détail de votre score</h2>
+      <div class="detail-grid">
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-icon">🍽️</span>
+            <span class="detail-label">Alimentation</span>
+            <span class="detail-score">{{ donnee.score_alimentation }}/20</span>
+          </div>
+          <div class="detail-bar"><div class="detail-fill fill-teal animated-bar" data-width="{{ (donnee.score_alimentation / 20 * 100) | int }}%"></div></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-icon">🏃</span>
+            <span class="detail-label">Activité physique</span>
+            <span class="detail-score">{{ donnee.score_activite }}/20</span>
+          </div>
+          <div class="detail-bar"><div class="detail-fill fill-blue animated-bar" data-width="{{ (donnee.score_activite / 20 * 100) | int }}%"></div></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-icon">😴</span>
+            <span class="detail-label">Sommeil</span>
+            <span class="detail-score">{{ donnee.score_sommeil }}/20</span>
+          </div>
+          <div class="detail-bar"><div class="detail-fill fill-amber animated-bar" data-width="{{ (donnee.score_sommeil / 20 * 100) | int }}%"></div></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-icon">🧠</span>
+            <span class="detail-label">Comportements</span>
+            <span class="detail-score">{{ donnee.score_comportement }}/20</span>
+          </div>
+          <div class="detail-bar"><div class="detail-fill fill-purple animated-bar" data-width="{{ (donnee.score_comportement / 20 * 100) | int }}%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSEILS -->
+    {% if conseils %}
+    <div class="conseils-section animate-fadein-scroll">
+      <h2 class="section-title-sm">💡 Conseils personnalisés</h2>
+      <div class="conseils-list">
+        {% for conseil in conseils %}
+        <div class="conseil-item conseil-{{ conseil.type }}">
+          <div class="conseil-icon">
+            {% if conseil.type == 'success' %}✓{% elif conseil.type == 'danger' %}⚠{% elif conseil.type == 'warning' %}!{% else %}i{% endif %}
+          </div>
+          <div class="conseil-body">
+            <strong class="conseil-titre">{{ conseil.titre }}</strong>
+            <p class="conseil-texte">{{ conseil.texte }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- GRAPHIQUES COMMUNAUTAIRES -->
+    <div class="charts-section animate-fadein-scroll">
+      <h2 class="section-title-sm">📊 Résultats de la communauté</h2>
+      <p class="section-sub-sm">Basé sur {{ total }} participants</p>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3 class="chart-title">Niveaux de santé</h3>
+          <canvas id="niveauxChart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Activité physique</h3>
+          <canvas id="activiteChart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Participants par ville</h3>
+          <canvas id="villesChart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Votre profil vs Moyenne</h3>
+          <canvas id="radarChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+  </div>
+</section>
+
+<div id="statsData" style="display:none">{{ stats }}</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const statsRaw = document.getElementById('statsData').textContent;
+const stats = JSON.parse(statsRaw || '{}');
+const teal = '#1D9E75', blue = '#185FA5', amber = '#BA7517', purple = '#7F77DD', coral = '#D85A30';
+const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+const textColor = isDark ? '#c2c0b6' : '#3d3d3a';
+const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+Chart.defaults.color = textColor;
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 12;
+
+if (stats.niveaux) {
+  new Chart(document.getElementById('niveauxChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(stats.niveaux),
+      datasets: [{ data: Object.values(stats.niveaux), backgroundColor: [coral, amber, teal, blue], borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+  });
+}
+
+if (stats.activites) {
+  const labels = {'jamais':'Jamais','1-2x':'1-2x/sem','3-5x':'3-5x/sem','quotidien':'Quotidien'};
+  new Chart(document.getElementById('activiteChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(stats.activites).map(k => labels[k] || k),
+      datasets: [{ data: Object.values(stats.activites), backgroundColor: teal, borderRadius: 6 }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: gridColor }, beginAtZero: true }, x: { grid: { display: false } } } }
+  });
+}
+
+if (stats.villes) {
+  const topVilles = Object.entries(stats.villes).sort((a,b) => b[1]-a[1]).slice(0,6);
+  new Chart(document.getElementById('villesChart'), {
+    type: 'bar',
+    data: {
+      labels: topVilles.map(v => v[0]),
+      datasets: [{ data: topVilles.map(v => v[1]), backgroundColor: blue, borderRadius: 6 }]
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor }, beginAtZero: true }, y: { grid: { display: false } } } }
+  });
+}
+
+// Radar : profil utilisateur vs moyenne
+const donneeEl = document.querySelector('.score-arc');
+if (donneeEl && stats.score_moyen) {
+  const scoreAli  = parseInt('{{ donnee.score_alimentation if donnee else 0 }}');
+  const scoreAct  = parseInt('{{ donnee.score_activite if donnee else 0 }}');
+  const scoreSom  = parseInt('{{ donnee.score_sommeil if donnee else 0 }}');
+  const scoreCom  = parseInt('{{ donnee.score_comportement if donnee else 0 }}');
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Alimentation','Activité','Sommeil','Comportement'],
+      datasets: [
+        { label: 'Vous', data: [scoreAli, scoreAct, scoreSom, scoreCom], borderColor: teal, backgroundColor: teal+'33', pointBackgroundColor: teal },
+        { label: 'Moyenne', data: [12, 12, 12, 12], borderColor: blue, backgroundColor: blue+'22', pointBackgroundColor: blue, borderDash: [4,4] }
+      ]
+    },
+    options: { scales: { r: { min: 0, max: 20, grid: { color: gridColor }, angleLines: { color: gridColor } } }, plugins: { legend: { position: 'bottom' } } }
+  });
+}
+
+// Animer les barres de détail
+document.querySelectorAll('.animated-bar').forEach(bar => {
+  const w = bar.dataset.width;
+  setTimeout(() => { bar.style.width = w; }, 300);
+});
+</script>
+{% endblock %}

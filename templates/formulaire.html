@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% block title %}Formulaire de santé — RootCare{% endblock %}
+
+{% block content %}
+<section class="form-section">
+  <div class="form-page-container">
+
+    <div class="form-page-header animate-fadein">
+      <h1 class="form-page-title">Questionnaire de santé</h1>
+      <p class="form-page-sub">Bonjour <strong>{{ current_user.nom }}</strong> — Répondez honnêtement pour obtenir un score précis.</p>
+      <div class="progress-steps">
+        <div class="step-indicator active" data-step="1">Alimentation</div>
+        <div class="step-line"></div>
+        <div class="step-indicator" data-step="2">Activité & Sommeil</div>
+        <div class="step-line"></div>
+        <div class="step-indicator" data-step="3">Comportements</div>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('formulaire') }}" id="healthForm" novalidate>
+
+      <!-- ÉTAPE 1 : ALIMENTATION -->
+      <div class="form-step active" id="step1">
+        <div class="form-card animate-fadein">
+          <div class="form-card-header">
+            <span class="step-badge">Étape 1 / 3</span>
+            <h2 class="form-card-title">🍽️ Alimentation</h2>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Combien de repas mangez-vous par jour ? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-card"><input type="radio" name="nb_repas" value="1"><span>1 repas</span></label>
+              <label class="radio-card"><input type="radio" name="nb_repas" value="2"><span>2 repas</span></label>
+              <label class="radio-card"><input type="radio" name="nb_repas" value="3"><span>3 repas</span></label>
+              <label class="radio-card"><input type="radio" name="nb_repas" value="+3"><span>Plus de 3</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">À quelle fréquence mangez-vous des fruits et légumes ? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-card"><input type="radio" name="fruits_legumes" value="quotidien"><span>Quotidiennement</span></label>
+              <label class="radio-card"><input type="radio" name="fruits_legumes" value="souvent"><span>Souvent</span></label>
+              <label class="radio-card"><input type="radio" name="fruits_legumes" value="parfois"><span>Parfois</span></label>
+              <label class="radio-card"><input type="radio" name="fruits_legumes" value="jamais"><span>Jamais</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Combien de litres d'eau buvez-vous par jour ? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-card"><input type="radio" name="eau_par_jour" value="-1L"><span>Moins de 1L</span></label>
+              <label class="radio-card"><input type="radio" name="eau_par_jour" value="1-2L"><span>1 à 2 litres</span></label>
+              <label class="radio-card"><input type="radio" name="eau_par_jour" value="+2L"><span>Plus de 2L</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Considérez-vous votre alimentation comme équilibrée ?</label>
+            <div class="radio-group">
+              <label class="radio-card"><input type="radio" name="alimentation_eq" value="oui"><span>Oui</span></label>
+              <label class="radio-card"><input type="radio" name="alimentation_eq" value="parfois" checked><span>Parfois</span></label>
+              <label class="radio-card"><input type="radio" name="alimentation_eq" value="non"><span>Non</span></label>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <div></div>
+            <button type="button" class="btn btn-primary" onclick="nextStep(2)">Suivant →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 2 : ACTIVITÉ & SOMMEIL -->
+      <div class="form-step" id="step2">
+        <div class="form-card animate-fadein">
+          <div class="form-card-header">
+            <span class="step-badge">Étape 2 / 3</span>
+            <h2 class="form-card-title">🏃 Activité physique & Sommeil</h2>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">À quelle fréquence faites-vous de l'activité physique ? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-card"><input type="radio" name="activite_physique" value="jamais"><span>Jamais</span></label>
+              <label class="radio-card"><input type="radio" name="activite_physique" value="1-2x"><span>1-2x / semaine</span></label>
+              <label class="radio-card"><input type="radio" name="activite_physique" value="3-5x"><span>3-5x / semaine</span></label>
+              <label class="radio-card"><input type="radio" name="activite_physique" value="quotidien"><span>Quotidiennement</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Type(s) d'activité pratiquée(s) <span class="optional">(optionnel)</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-card"><input type="checkbox" name="type_activite" value="marche"><span>Marche</span></label>
+              <label class="checkbox-card"><input type="checkbox" name="type_activite" value="course"><span>Course</span></label>
+              <label class="checkbox-card"><input type="checkbox" name="type_activite" value="musculation"><span>Musculation</span></label>
+              <label class="checkbox-card"><input type="checkbox" name="type_activite" value="sport_equipe"><span>Sport d'équipe</span></label>
+              <label class="checkbox-card"><input type="checkbox" name="type_activite" value="natation"><span>Natation</span></label>
+              <label class="checkbox-card"><input type="checkbox" name="type_activite" value="danse"><span>Danse</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Combien d'heures dormez-vous par nuit ? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-card"><input type="radio" name="heures_sommeil" value="-6h"><span>Moins de 6h</span></label>
+              <label class="radio-card"><input type="radio" name="heures_sommeil" value="6-8h"><span>6 à 8 heures</span></label>
+              <label class="radio-card"><input type="radio" name="heures_sommeil" value="+8h"><span>Plus de 8h</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Comment évaluez-vous la qualité de votre sommeil ? <span class="required">*</span></label>
+            <div class="range-group">
+              <div class="range-labels">
+                <span>Très mauvais</span>
+                <span>Excellent</span>
+              </div>
+              <input type="range" name="qualite_sommeil" min="1" max="5" value="3" class="range-input" id="sleepRange" oninput="updateRange(this, 'sleepVal')">
+              <div class="range-value-display">
+                <div class="range-dots">
+                  <span class="range-dot active" data-val="1">1</span>
+                  <span class="range-dot active" data-val="2">2</span>
+                  <span class="range-dot active" data-val="3">3</span>
+                  <span class="range-dot" data-val="4">4</span>
+                  <span class="range-dot" data-val="5">5</span>
+                </div>
+                <span id="sleepVal" class="range-badge">3 / 5</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn btn-outline" onclick="prevStep(1)">← Retour</button>
+            <button type="button" class="btn btn-primary" onclick="nextStep(3)">Suivant →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 3 : COMPORTEMENTS -->
+      <div class="form-step" id="step3">
+        <div class="form-card animate-fadein">
+          <div class="form-card-header">
+            <span class="step-badge">Étape 3 / 3</span>
+            <h2 class="form-card-title">🧠 Comportements & Bien-être</h2>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Consommez-vous du tabac ? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-card radio-card-success"><input type="radio" name="tabac" value="jamais"><span>Jamais</span></label>
+              <label class="radio-card radio-card-warning"><input type="radio" name="tabac" value="occasionnel"><span>Occasionnellement</span></label>
+              <label class="radio-card radio-card-danger"><input type="radio" name="tabac" value="regulier"><span>Régulièrement</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Consommez-vous de l'alcool ? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-card radio-card-success"><input type="radio" name="alcool" value="jamais"><span>Jamais</span></label>
+              <label class="radio-card radio-card-warning"><input type="radio" name="alcool" value="occasionnel"><span>Occasionnellement</span></label>
+              <label class="radio-card radio-card-danger"><input type="radio" name="alcool" value="regulier"><span>Régulièrement</span></label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quel est votre niveau de stress quotidien ? <span class="required">*</span></label>
+            <div class="range-group">
+              <div class="range-labels">
+                <span>Aucun stress</span>
+                <span>Très stressé</span>
+              </div>
+              <input type="range" name="niveau_stress" min="1" max="5" value="3" class="range-input" id="stressRange" oninput="updateRange(this, 'stressVal')">
+              <div class="range-value-display">
+                <div class="range-dots">
+                  <span class="range-dot active" data-val="1">1</span>
+                  <span class="range-dot active" data-val="2">2</span>
+                  <span class="range-dot active" data-val="3">3</span>
+                  <span class="range-dot" data-val="4">4</span>
+                  <span class="range-dot" data-val="5">5</span>
+                </div>
+                <span id="stressVal" class="range-badge">3 / 5</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn btn-outline" onclick="prevStep(2)">← Retour</button>
+            <button type="submit" class="btn btn-primary btn-lg">
+              Soumettre et voir mon score →
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function nextStep(n) {
+  const current = document.querySelector('.form-step.active');
+  const currentNum = parseInt(current.id.replace('step',''));
+  // Validation basique
+  const required = current.querySelectorAll('input[required]');
+  let valid = true;
+  const groups = {};
+  required.forEach(inp => {
+    if (inp.type === 'radio') {
+      groups[inp.name] = groups[inp.name] || false;
+      if (inp.checked) groups[inp.name] = true;
+    }
+  });
+  Object.values(groups).forEach(v => { if (!v) valid = false; });
+  if (!valid) {
+    showToast('Veuillez répondre à toutes les questions obligatoires.', 'warning');
+    return;
+  }
+  current.classList.remove('active');
+  document.getElementById('step'+n).classList.add('active');
+  document.querySelectorAll('.step-indicator').forEach((el, i) => {
+    el.classList.toggle('active', i < n);
+    el.classList.toggle('done', i < n-1);
+  });
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function prevStep(n) {
+  document.querySelector('.form-step.active').classList.remove('active');
+  document.getElementById('step'+n).classList.add('active');
+  document.querySelectorAll('.step-indicator').forEach((el, i) => {
+    el.classList.toggle('active', i <= n-1);
+    el.classList.toggle('done', i < n-1);
+  });
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function updateRange(input, valId) {
+  const val = input.value;
+  document.getElementById(valId).textContent = val + ' / 5';
+  const dots = input.nextElementSibling.querySelectorAll('.range-dot');
+  dots.forEach((dot, i) => dot.classList.toggle('active', i < val));
+}
+
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'flash flash-' + type;
+  t.innerHTML = '<span>' + msg + '</span>';
+  document.querySelector('.flash-container') ?
+    document.querySelector('.flash-container').appendChild(t) :
+    (() => {
+      const c = document.createElement('div');
+      c.className = 'flash-container';
+      c.appendChild(t);
+      document.body.prepend(c);
+    })();
+  setTimeout(() => t.remove(), 3000);
+}
+</script>
+{% endblock %}

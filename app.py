@@ -187,9 +187,6 @@ def api_stats():
     return jsonify(get_stats_globales())
 
 # --- POINT D'ENTRÉE ---
-# Note : db.create_all() est conservé ici mais doit être lancé manuellement localement une fois 
-with app.app_context():
-    db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True)
